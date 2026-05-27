@@ -139,18 +139,18 @@ class Parser:
 			self.check(ord('<'))
 			self.additiveExpression()
 			self.extendedRelationalExpression()
-			if self.token.tag == ord('='):
-				self.check(ord('='))
-				self.additiveExpression()
-				self.extendedRelationalExpression()
+		elif self.token.tag == Tag.LEQ:
+			self.check(Tag.LEQ)
+			self.additiveExpression()
+			self.extendedRelationalExpression()
 		elif self.token.tag == ord('>'):
 			self.check(ord('>'))
 			self.additiveExpression()
 			self.extendedRelationalExpression()
-			if self.token.tag == ord('='):
-				self.check(ord('='))
-				self.additiveExpression()
-				self.extendedRelationalExpression()
+		elif self.token.tag == Tag.GEQ:
+			self.check(Tag.GEQ)
+			self.additiveExpression()
+			self.extendedRelationalExpression()
 		else:
 			pass
 
@@ -164,9 +164,8 @@ class Parser:
 			self.check(ord('='))
 			self.relationalExpression()
 			self.extendedEqualityExpression()
-		elif self.token.tag == ord('<'):
-			self.check(ord('<'))
-			self.check(ord('>'))
+		elif self.token.tag == Tag.NEQ:
+			self.check(Tag.NEQ)
 			self.relationalExpression()
 			self.extendedEqualityExpression()
 		else:
@@ -176,18 +175,40 @@ class Parser:
 	
 	#<extended-conditional-term> ::= AND <equality-expression> <extended-conditional-term>
 	#<extended-boolean-term> ::= ' '
+	def extendedConditionalTerm(self):
+		if self.token.tag == Tag.AND:
+			self.check(Tag.AND)
+			self.equalityExpression()
+			self.extendedConditionalTerm()
+		else:
+			pass
 
 	#<conditional-term> ::= <equality-expression> <extended-conditional-term>
 	
 	#<extended-conditional-expression> ::= OR <conditional-term> <extended-conditional-expression>
 	#<extended-conditional-expression> ::= ' '
+	def extendedConditionalTerm(self):
+		if self.token.tag == Tag.OR:
+			self.check(Tag.OR)
+			self.equalityExpression()
+			self.extendedConditionalTerm()
+		else:
+			pass
 
 	#<conditional-expression> ::= <conditional-term> <extended-conditional-expression>
 	
 	#<expression> ::= <conditional-expression>
 	
 	#<text-statement> ::= PRINT '(' <expression> )'
-	
+	def textStatement(self):
+		if self.token.tag == Tag.PRINT:
+			self.check(Tag.PRINT)
+			self.check(ord('('))
+			self.expression()
+			self.check(ord(')'))
+		else:
+			self.error("expected a text statement before " + str(self.token))
+
 	#<assigment-statement> ::= <identifier> ':''=' <expression>
 	
 	#<statement> ::= <assignment-statement> | <text-statement>
@@ -197,8 +218,22 @@ class Parser:
 	
 	#<identifier-list> ::= ',' <identifier> <identifier-list>
 	#<identifier-list> ::= ' '
-	
+	def identifierList(self):
+		if self.token.tag == ord(','):
+			self.check(ord(','))
+			self.check(Tag.ID) # identifier
+			self.identifierList()
+		else:
+			pass
+
 	#<declaration-sequence> ::= VAR <identifier> <identifier-list>
+	def declarationSequence(self):
+		if self.token.tag == Tag.VAR:
+			self.check(Tag.VAR)
+			self.check(Tag.ID)
+			self.identifierList()
+		else:
+			self.error("expected a declaration sequence before " + str(self.token))
 	
 	#<program> ::= <declaration-sequence> <statement-sequence>
 	def program(self):
