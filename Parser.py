@@ -155,6 +155,12 @@ class Parser:
 			pass
 
 	#<relational-expression> ::= <additive-expression> <extended-relational-expression>
+	def relationalExpression(self):
+		if self.token.tag in self.firstAdditiveExpression:
+			self.additiveExpression()
+			self.extendedRelationalExpression()
+		else:
+			self.error("expected a relational expression before " + str(self.token))
 
 	#<extended-equality-expression> := '=' <relational-expression> <extended-equality-expression>
 	#<extended-equality-expression> := '<''>' <relational-expression> <extended-equality-expression>
@@ -210,7 +216,14 @@ class Parser:
 			self.error("expected a text statement before " + str(self.token))
 
 	#<assigment-statement> ::= <identifier> ':''=' <expression>
-	
+	def assignmentStatement(self):
+		if self.token.tag == Tag.ID:
+			self.check(Tag.ID)
+			self.check(Tag.ASSIGN)
+			self.expression()
+		else:
+			self.error("expected an assignment statement before " + str(self.token))
+
 	#<statement> ::= <assignment-statement> | <text-statement>
 	
 	#<statement-sequence> ::= <statement> <statement-sequence>
