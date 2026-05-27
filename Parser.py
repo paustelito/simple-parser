@@ -98,25 +98,80 @@ class Parser:
 			pass
 
 	#<multiplicative-expression> ::= <unary-expression> <extended-multiplicative-expression>
-	
+	def multiplicativeExpression(self):
+		if self.token.tag in self.firstMultiplicativeExpression:
+			self.unaryExpression()
+			self.extendedMultiplicativeExpression()
+		else:
+			self.error("expected a multiplicative expression before " + str(self.token)) 
+
 	#<extended-additive-expression> ::= '+' <multiplicative-expression> <extended-additive-expression>
 	#<extended-additive-expression> ::= '-' <multiplicative-expression> <extended-additive-expression>
 	#<extended-additive-expression> ::= ' '
-	
+	def extendedAdditiveExpression(self):
+		if self.token.tag in self.firstExtendedAdditiveExpression:
+			if self.token.tag == ord('+'):
+				self.check(ord('+'))
+				self.multiplicativeExpression()
+				self.extendedAdditiveExpression()
+			elif self.token.tag == ord('-'):
+				self.check(ord('-'))
+				self.multiplicativeExpression()
+				self.extendedAdditiveExpression()
+		else:
+			pass
+
 	#<additive-expression> ::= <multiplicative-expression> <extended-additive-expression>
-	
+	def additiveExpression(self):
+		if self.token.tag in self.firstAdditiveExpression:
+			self.multiplicativeExpression()
+			self.extendedAdditiveExpression()
+		else:
+			self.error("expected an additive expression before " + str(self.token)) 
+
 	#<extended-relational-expression> := '<' <additive-expression> <extended-relational-expression>
 	#<extended-relational-expression> ::= '<''=' <additive-expression> <extended-relational-expression>
 	#<extended-relational-expression> := '>' <additive-expression> <extended-relational-expression>
 	#<extended-relational-expression> ::= '>''=' <additive-expression> <extended-relational-expression>
 	#<extended-relational-expression> ::= ' '
-	
+	def extendedRelationalExpression(self):
+		if self.token.tag == ord('<'):
+			self.check(ord('<'))
+			self.additiveExpression()
+			self.extendedRelationalExpression()
+			if self.token.tag == ord('='):
+				self.check(ord('='))
+				self.additiveExpression()
+				self.extendedRelationalExpression()
+		elif self.token.tag == ord('>'):
+			self.check(ord('>'))
+			self.additiveExpression()
+			self.extendedRelationalExpression()
+			if self.token.tag == ord('='):
+				self.check(ord('='))
+				self.additiveExpression()
+				self.extendedRelationalExpression()
+		else:
+			pass
+
 	#<relational-expression> ::= <additive-expression> <extended-relational-expression>
-	
+
 	#<extended-equality-expression> := '=' <relational-expression> <extended-equality-expression>
 	#<extended-equality-expression> := '<''>' <relational-expression> <extended-equality-expression>
 	#<extended-equality-expression> ::= ' '
-	
+	def extendedEqualityExpression(self):
+		if self.token.tag == ord('='):
+			self.check(ord('='))
+			self.relationalExpression()
+			self.extendedEqualityExpression()
+		elif self.token.tag == ord('<'):
+			self.check(ord('<'))
+			self.check(ord('>'))
+			self.relationalExpression()
+			self.extendedEqualityExpression()
+		else:
+			pass
+
 	#<equality-expression> ::= <relational-expression> <extended-equality-expression>
 	
 	#<extended-conditional-term> ::= AND <equality-expression> <extended-conditional-term>
