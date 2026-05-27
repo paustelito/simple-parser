@@ -15,6 +15,7 @@ class Parser:
 		self.firstMultiplicativeExpression = self.firstUnaryExpression
 		self.firstExtendedAdditiveExpression = set((ord('+'), ord('-')))
 		self.firstAdditiveExpression = self.firstMultiplicativeExpression
+		self.firstProgram = set((Tag.VAR, Tag.ID)) # depende de declaration sequence (empieza con var-id)
 
 	def error(self, extra = None):
 		text = 'Line ' + str(self.lex.line) + " - " 
@@ -205,11 +206,11 @@ class Parser:
 
 	#<extended-conditional-expression> ::= OR <conditional-term> <extended-conditional-expression>
 	#<extended-conditional-expression> ::= ' '
-	def extendedConditionalTerm(self):
+	def extendedConditionalExpression(self):
 		if self.token.tag == Tag.OR:
 			self.check(Tag.OR)
 			self.conditionalTerm()
-			self.extendedConditionalTerm()
+			self.extendedConditionalExpression()
 		else:
 			pass
 
